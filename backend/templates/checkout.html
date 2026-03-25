@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Checkout - ArtBridge</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <!-- Navbar (reuse existing theme) -->
+    <div class="navbar">
+        <div class="logo">ArtBridge</div>
+        <div class="nav-links">
+            <a href="/" style="color: white; text-decoration: none;">← Back</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="products" style="margin-left: 0;">
+            <h2>Checkout</h2>
+
+            <div class="card">
+                <img id="productImage" alt="Product image" style="display:none;" />
+                <h4 id="productName">Loading...</h4>
+                <p id="productPrice"></p>
+                <p id="productDescription" style="font-weight: normal;"></p>
+                <button id="payNow">Pay Now</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <script>
+      window.RAZORPAY_KEY_ID = "{{ razorpay_key_id }}";
+    </script>
+    <script src="{{ url_for('static', filename='payment.js') }}"></script>
+</body>
+</html>
+

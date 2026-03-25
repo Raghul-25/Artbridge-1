@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ArtBridge</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <!-- Navbar -->
+    <div class="navbar">
+        <div class="logo">ArtBridge</div>
+        
+        <div class="search-bar">
+            <input type="text" id="search" placeholder="Search products...">
+            <button>🔍</button>
+        </div>
+
+        <div class="nav-links">
+            <span onclick="window.location.href='/cart_page'">Cart</span>
+            <span onclick="window.location.href='/orders_page'">Orders</span>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container">
+
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <h3>Categories</h3>
+            <ul>
+                <li onclick="selectCategory('mud')">Mud Pots</li>
+                <li onclick="selectCategory('basket')">Baskets</li>
+                <li onclick="selectCategory('handicraft')">Handicrafts</li>
+            </ul>
+        </div>
+
+        <!-- Product Area -->
+        <div class="products">
+
+            <h2>Featured Products</h2>
+
+            <!-- Dynamic Product Grid -->
+            <p id="loadingMessage" style="display: none; padding: 18px 6px; color: var(--muted); font-size: 16px;">Loading...</p>
+            <p id="emptyMessage" style="display: none;">No products available</p>
+            <div class="product-grid" id="productGrid">
+            </div>
+
+        </div>
+
+    </div>
+
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

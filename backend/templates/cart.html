@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Cart - ArtBridge</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <!-- Navbar -->
+    <div class="navbar">
+        <div class="logo">ArtBridge</div>
+        <div class="nav-links">
+            <a href="/" style="color: white; text-decoration: none;">← Back</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="products" style="margin-left: 0;">
+            <h2>My Cart</h2>
+
+            <div id="cartContainer"></div>
+            <p id="cartEmptyMessage" style="display:none; color:#555; font-size:16px; padding: 18px 6px;">Your cart is empty</p>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='cart.js') }}"></script>
+</body>
+</html>
+
