@@ -2,53 +2,92 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>ArtBridge</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="ArtBridge – Discover handcrafted artisan goods made with love. Shop authentic mud pots, baskets, and handicrafts.">
+    <title>ArtBridge – Handcrafted Artisan Marketplace</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
 
     <!-- Navbar -->
-    <div class="navbar">
-        <div class="logo">ArtBridge</div>
-        
-        <div class="search-bar">
-            <input type="text" id="search" placeholder="Search products...">
-            <button>🔍</button>
+    <nav class="navbar" role="navigation" aria-label="Main navigation">
+        <div class="logo" onclick="window.location.href='/'">ArtBridge</div>
+
+        <div class="search-bar" role="search">
+            <input type="text" id="search" placeholder="Search handcrafted items…" autocomplete="off" aria-label="Search products">
+            <button id="searchBtn" aria-label="Submit search" style="font-size: 13px; font-weight: bold; letter-spacing: 0.5px;">SEARCH</button>
         </div>
 
         <div class="nav-links">
-            <span onclick="window.location.href='/cart_page'">Cart</span>
-            <span onclick="window.location.href='/orders_page'">Orders</span>
+            <span class="nav-btn" id="navCartBtn" onclick="window.location.href='/cart_page'" title="View Cart">
+                🛒 Cart <span class="cart-badge" id="cartCount">0</span>
+            </span>
+            <span class="nav-separator">|</span>
+            <span class="nav-btn" onclick="window.location.href='/orders_page'" title="View Orders">📦 Orders</span>
+            <span class="nav-separator">|</span>
+            {% if session.get('customer_name') %}
+                <span class="nav-btn" style="cursor:default;">👋 {{ session.get('customer_name') }}</span>
+                <span class="nav-btn" onclick="fetch('/api/logout',{method:'POST'}).then(()=>window.location.reload())" title="Logout" style="color:#e07070;">Logout</span>
+            {% else %}
+                <span class="nav-btn" onclick="window.location.href='/login'">Login</span>
+            {% endif %}
         </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero" aria-label="Hero banner">
+        <div class="hero-tag">✦ Handmade with Love</div>
+        <h1>Discover <span>Artisan</span> Crafts<br>Like Never Before</h1>
+        <p>Browse authentic handcrafted goods from talented artisans across India — mud pots, baskets, textiles &amp; more.</p>
+        <div class="hero-stats" id="heroStats">
+            <div class="stat">
+                <div class="stat-value" id="statProducts">—</div>
+                <div class="stat-label">Products</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">100%</div>
+                <div class="stat-label">Handmade</div>
+            </div>
+            <div class="stat">
+                <div class="stat-value">✦</div>
+                <div class="stat-label">Artisan Made</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Filter / Category Bar -->
+    <div class="filter-bar" role="navigation" aria-label="Category filters">
+        <span class="filter-label">Filter:</span>
+        <button class="filter-chip active" id="chip-all" onclick="filterCategory('all', this)">All</button>
+        <button class="filter-chip" id="chip-mud" onclick="filterCategory('mud', this)">🏺 Mud Pots</button>
+        <button class="filter-chip" id="chip-basket" onclick="filterCategory('basket', this)">🧺 Baskets</button>
+        <button class="filter-chip" id="chip-handicraft" onclick="filterCategory('handicraft', this)">🎨 Handicrafts</button>
     </div>
 
     <!-- Main Container -->
-    <div class="container">
+    <main class="container" id="mainContent">
 
-        <!-- Sidebar -->
-        <div class="sidebar">
-            <h3>Categories</h3>
-            <ul>
-                <li onclick="selectCategory('mud')">Mud Pots</li>
-                <li onclick="selectCategory('basket')">Baskets</li>
-                <li onclick="selectCategory('handicraft')">Handicrafts</li>
-            </ul>
+        <div class="section-header">
+            <h2 id="sectionTitle">Featured Products</h2>
+            <span class="product-count" id="productCount"></span>
         </div>
 
-        <!-- Product Area -->
+        <!-- Product Grid -->
         <div class="products">
-
-            <h2>Featured Products</h2>
-
-            <!-- Dynamic Product Grid -->
-            <p id="loadingMessage" style="display: none; padding: 18px 6px; color: var(--muted); font-size: 16px;">Loading...</p>
-            <p id="emptyMessage" style="display: none;">No products available</p>
-            <div class="product-grid" id="productGrid">
+            <div class="product-grid" id="productGrid" aria-live="polite"></div>
+            <div id="emptyMessage" style="display:none;">
+                <div class="empty-state">
+                    <div class="empty-icon">🔍</div>
+                    <h3>No products found</h3>
+                    <p>Try a different search or category filter.</p>
+                </div>
             </div>
-
         </div>
 
-    </div>
+    </main>
+
+    <!-- Toast Container -->
+    <div id="toastContainer" aria-live="polite" aria-atomic="true"></div>
 
     <script src="{{ url_for('static', filename='app.js') }}"></script>
 </body>

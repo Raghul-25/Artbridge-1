@@ -1,75 +1,99 @@
+/* ── Toast Helper ───────────────────────────────────────── */
+function showToast(message, type = 'info') {
+  const container = document.getElementById("toastContainer");
+  if (!container) return;
+  const toast = document.createElement("div");
+  toast.className = `toast toast-${type}`;
+  toast.innerHTML = `<span class="toast-icon"></span><span>${message}</span>`;
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.classList.add("leaving");
+    setTimeout(() => toast.remove(), 280);
+  }, 3000);
+}
+
+/* ── Load Orders ────────────────────────────────────────── */
 async function loadOrders() {
   try {
     const res = await fetch("/orders");
-    if (!res.ok) {
-      throw new Error(`API error: ${res.status} ${res.statusText}`);
-    }
+    if (!res.ok) throw new Error(`API error: ${res.status}`);
     const orders = await res.json();
     displayOrders(orders);
   } catch (err) {
-    console.log("Failed to load orders:", err);
+    console.error("Failed to load orders:", err);
+    showToast("Failed to load orders. Is the server running?", "error");
+    const container = document.getElementById("ordersContainer");
+    if (container) {
+      container.innerHTML = `<div class="empty-state" style="border:1px solid var(--border); border-radius:var(--radius); padding:40px;">
+        <div class="empty-icon">⚠️</div>
+        <h3>Could not connect</h3>
+        <p>Make sure the ArtBridge backend is running.</p>
+      </div>`;
+    }
   }
 }
 
-function statusColor(status) {
+/* ── Status Badge ───────────────────────────────────────── */
+function getStatusBadge(status) {
   const s = String(status || "").toLowerCase();
-  if (s.includes("delivered")) return "green";
-  if (s.includes("shipped")) return "#1e66c5";
-  if (s.includes("processing")) return "orange";
-  return "#555";
+  let cls = "order-badge";
+  let icon = "⏳";
+  if (s.includes("delivered")) { cls += " delivered"; icon = "✅"; }
+  else if (s.includes("shipped")) { cls += " shipped"; icon = "🚚"; }
+  else if (s.includes("processing")) { cls += " processing"; icon = "🔄"; }
+  return `<span class="${cls}">${icon} ${status || "Unknown"}</span>`;
 }
 
+function getPaymentBadge(paymentStatus) {
+  const s = String(paymentStatus || "").toLowerCase();
+  if (s.includes("paid")) return `<span class="order-badge paid">✅ Paid</span>`;
+  return `<span class="order-badge" style="color:var(--text-3);">${paymentStatus || "—"}</span>`;
+}
+
+/* ── Display Orders ─────────────────────────────────────── */
 function displayOrders(orders) {
   const container = document.getElementById("ordersContainer");
-  const emptyMessage = document.getElementById("ordersEmptyMessage");
-
-  if (!container) {
-    console.log("ordersContainer element not found");
-    return;
-  }
+  const emptyMsg  = document.getElementById("ordersEmptyMessage");
+  if (!container) return;
 
   container.innerHTML = "";
 
   if (!Array.isArray(orders) || orders.length === 0) {
-    if (emptyMessage) emptyMessage.style.display = "block";
+    if (emptyMsg) emptyMsg.style.display = "block";
     return;
   }
 
-  if (emptyMessage) emptyMessage.style.display = "none";
+  if (emptyMsg) emptyMsg.style.display = "none";
 
-  orders.forEach((o) => {
+  orders.forEach((o, i) => {
     const card = document.createElement("div");
-    card.className = "card";
-    card.style.marginBottom = "15px";
-    card.style.textAlign = "left";
+    card.className = "order-card";
+    card.style.animationDelay = `${i * 60}ms`;
 
-    const orderIdEl = document.createElement("h4");
-    orderIdEl.textContent = `Order #${o?.order_id ?? ""}`;
-
-    const productEl = document.createElement("p");
-    productEl.style.fontWeight = "normal";
-    productEl.textContent = `Product ID: ${o?.product_id ?? ""}`;
-
-    const statusEl = document.createElement("p");
-    statusEl.style.fontWeight = "normal";
-    statusEl.innerHTML = `Status: <span style="color:${statusColor(
-      o?.status
-    )}; font-weight:bold;">${o?.status ?? ""}</span>`;
-
-    const trackingEl = document.createElement("p");
-    trackingEl.style.fontWeight = "normal";
-    trackingEl.textContent = `Tracking: ${o?.tracking ?? ""}`;
-
-    card.appendChild(orderIdEl);
-    card.appendChild(productEl);
-    card.appendChild(statusEl);
-    card.appendChild(trackingEl);
+    card.innerHTML = `
+      <div class="order-card-header">
+        <div class="order-id">Order #${o?.order_id ?? "—"}</div>
+        ${getStatusBadge(o?.status)}
+      </div>
+      <div class="order-meta">
+        <div class="order-meta-item">
+          <label>Product ID</label>
+          <span>#${o?.product_id ?? "—"}</span>
+        </div>
+        <div class="order-meta-item">
+          <label>Tracking</label>
+          <span>${o?.tracking ?? "—"}</span>
+        </div>
+        <div class="order-meta-item">
+          <label>Payment</label>
+          <span>${o?.payment_status ?? "—"}</span>
+        </div>
+      </div>
+    `;
 
     container.appendChild(card);
   });
 }
 
-window.addEventListener("DOMContentLoaded", () => {
-  loadOrders();
-});
-
+/* ── Init ───────────────────────────────────────────────── */
+window.addEventListener("DOMContentLoaded", loadOrders);

@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+env/
+.env
+
+# Databases
+*.db
+*.sqlite3
+
+# Node
+node_modules/
+dist/
+build/
+
+# IDEs
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# AWS/Keys
+*.pem
+*.key
+artbridge_new
+artbridge_ec2

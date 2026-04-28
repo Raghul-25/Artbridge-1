@@ -1,0 +1,5 @@
+flask>=2.3
+gunicorn>=21.2
+boto3>=1.28
+razorpay>=1.3
+werkzeug>=2.3

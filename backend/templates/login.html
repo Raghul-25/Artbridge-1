@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login – ArtBridge</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        body { background: var(--color-bg, #1a1209); }
+
+        .auth-page { min-height: 100vh; display: flex; flex-direction: column; }
+
+        .auth-container {
+            max-width: 440px;
+            width: 90%;
+            margin: 56px auto 40px;
+            background: rgba(28,18,8,0.95);
+            padding: 40px;
+            border-radius: 18px;
+            box-shadow: 0 24px 64px rgba(0,0,0,0.75);
+            border: 1px solid rgba(184,149,106,0.22);
+        }
+
+        .auth-logo {
+            text-align: center;
+            font-family: 'Playfair Display', serif;
+            font-size: 26px;
+            color: #b8956a;
+            letter-spacing: 3px;
+            margin-bottom: 32px;
+        }
+
+        /* ── Tabs ─────────────────────────────── */
+        .auth-tabs {
+            display: flex;
+            border-bottom: 1px solid rgba(184,149,106,0.2);
+            margin-bottom: 28px;
+        }
+        .auth-tab {
+            flex: 1;
+            text-align: center;
+            padding: 10px 0;
+            cursor: pointer;
+            color: rgba(255,255,255,0.38);
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            transition: all 0.25s;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -1px;
+        }
+        .auth-tab.active { color: #b8956a; border-bottom-color: #b8956a; }
+
+        /* ── Step dots ────────────────────────── */
+        .step-dots {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 28px;
+        }
+        .step-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: rgba(184,149,106,0.25);
+            transition: background 0.3s;
+        }
+        .step-dot.on { background: #b8956a; }
+
+        /* ── Panels ───────────────────────────── */
+        .auth-panel { display: none; flex-direction: column; gap: 14px; }
+        .auth-panel.active { display: flex; }
+
+        /* ── Inputs ───────────────────────────── */
+        .auth-input {
+            width: 100%;
+            padding: 13px 16px;
+            background: rgba(0,0,0,0.32);
+            border: 1px solid rgba(184,149,106,0.28);
+            border-radius: 9px;
+            color: #f0e6d3;
+            font-size: 15px;
+            box-sizing: border-box;
+            transition: border-color 0.25s;
+        }
+        .auth-input:focus { outline: none; border-color: #b8956a; }
+        .auth-input::placeholder { color: rgba(255,255,255,0.28); }
+
+        /* OTP input special style */
+        #otpCode {
+            text-align: center;
+            font-size: 26px;
+            letter-spacing: 10px;
+            font-weight: bold;
+            color: #b8956a;
+        }
+
+        /* ── Buttons ──────────────────────────── */
+        .auth-btn {
+            width: 100%;
+            padding: 13px;
+            background: linear-gradient(135deg, #b8956a 0%, #d4a373 100%);
+            color: #1a1209;
+            border: none;
+            border-radius: 9px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            letter-spacing: 0.4px;
+            transition: opacity 0.25s, transform 0.18s;
+            margin-top: 4px;
+        }
+        .auth-btn:hover  { opacity: 0.9; transform: translateY(-1px); }
+        .auth-btn:active { transform: translateY(0); }
+        .auth-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+        .link-btn {
+            background: none; border: none;
+            color: #b8956a; cursor: pointer;
+            font-size: 13px; text-decoration: underline;
+            margin-top: 2px; padding: 0; width: 100%; text-align: center;
+        }
+
+        /* ── OTP info ─────────────────────────── */
+        .otp-info {
+            text-align: center;
+            color: rgba(255,255,255,0.5);
+            font-size: 13px;
+            line-height: 1.6;
+        }
+        .otp-info strong { color: #b8956a; }
+
+        /* ── hint ─────────────────────────────── */
+        .hint { font-size:12px; color:rgba(255,255,255,0.28); text-align:center; margin-top:10px; }
+    </style>
+</head>
+<body class="auth-page">
+
+<nav class="navbar">
+    <div class="logo" onclick="window.location.href='/'">ArtBridge</div>
+</nav>
+
+<div class="auth-container">
+    <div class="auth-logo">✦ ArtBridge</div>
+
+    <!-- Step dots -->
+    <div class="step-dots">
+        <div class="step-dot on"  id="dot1"></div>
+        <div class="step-dot"     id="dot2"></div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="auth-tabs" id="authTabs">
+        <div class="auth-tab active" id="tabLogin"    onclick="switchTab('login')">Login</div>
+        <div class="auth-tab"        id="tabRegister" onclick="switchTab('register')">Register</div>
+    </div>
+
+    <!-- ── LOGIN PANEL ────────────────────────────── -->
+    <div id="loginPanel" class="auth-panel active">
+        <input type="email"    id="loginEmail"    class="auth-input" placeholder="Email Address">
+        <input type="password" id="loginPassword" class="auth-input" placeholder="Password">
+        <button id="loginBtn" class="auth-btn" onclick="doLogin()">Send OTP to Email</button>
+    </div>
+
+    <!-- ── REGISTER PANEL ─────────────────────────── -->
+    <div id="registerPanel" class="auth-panel">
+        <input type="text"     id="regName"     class="auth-input" placeholder="Full Name">
+        <input type="tel"      id="regPhone"    class="auth-input" placeholder="Phone Number">
+        <input type="email"    id="regEmail"    class="auth-input" placeholder="Email Address (OTP will be sent here)">
+        <input type="password" id="regPassword" class="auth-input" placeholder="Create Password (min 6 chars)">
+        <button id="registerBtn" class="auth-btn" onclick="doRegister()">Send OTP & Create Account</button>
+    </div>
+
+    <!-- ── OTP PANEL ──────────────────────────────── -->
+    <div id="otpPanel" class="auth-panel">
+        <p class="otp-info" id="otpInfo">Enter the 6-digit code sent to your email.</p>
+        <input type="text" id="otpCode" class="auth-input" placeholder="• • • • • •"
+               maxlength="6" inputmode="numeric" autocomplete="one-time-code">
+        <button id="verifyBtn" class="auth-btn" onclick="doVerify()">Verify OTP ✓</button>
+        <button class="link-btn" onclick="resetToStep1()">← Go back</button>
+    </div>
+
+    <p class="hint" id="devHint"></p>
+</div>
+
+<div id="toastContainer" aria-live="polite"></div>
+
+<script>
+    // ── state ──────────────────────────────────────────────────────────────
+    let currentMode = "login";   // "login" | "register"
+
+    // ── toast ──────────────────────────────────────────────────────────────
+    function showToast(msg, type = "info") {
+        const c = document.getElementById("toastContainer");
+        const t = document.createElement("div");
+        t.className = `toast toast-${type}`;
+        t.innerHTML = `<span class="toast-icon"></span><span>${msg}</span>`;
+        c.appendChild(t);
+        setTimeout(() => { t.classList.add("leaving"); setTimeout(() => t.remove(), 280); }, 3800);
+    }
+
+    // ── switch tabs ────────────────────────────────────────────────────────
+    function switchTab(tab) {
+        currentMode = tab;
+        document.getElementById("loginPanel").classList.toggle("active", tab === "login");
+        document.getElementById("registerPanel").classList.toggle("active", tab === "register");
+        document.getElementById("tabLogin").classList.toggle("active",    tab === "login");
+        document.getElementById("tabRegister").classList.toggle("active", tab === "register");
+    }
+
+    // ── show OTP screen ────────────────────────────────────────────────────
+    function showOTPPanel(maskedEmail) {
+        document.getElementById("loginPanel").classList.remove("active");
+        document.getElementById("registerPanel").classList.remove("active");
+        document.getElementById("authTabs").style.display = "none";
+        document.getElementById("otpPanel").classList.add("active");
+        document.getElementById("otpInfo").innerHTML =
+            `Enter the 6-digit code sent to<br><strong>${maskedEmail}</strong>`;
+        document.getElementById("dot1").classList.remove("on");
+        document.getElementById("dot2").classList.add("on");
+        document.getElementById("otpCode").focus();
+    }
+
+    // ── reset to step 1 ────────────────────────────────────────────────────
+    function resetToStep1() {
+        document.getElementById("otpPanel").classList.remove("active");
+        document.getElementById("otpCode").value = "";
+        document.getElementById("authTabs").style.display = "flex";
+        document.getElementById("dot1").classList.add("on");
+        document.getElementById("dot2").classList.remove("on");
+        document.getElementById("devHint").textContent = "";
+        if (currentMode === "login") document.getElementById("loginPanel").classList.add("active");
+        else                         document.getElementById("registerPanel").classList.add("active");
+    }
+
+    // ── setBtn ─────────────────────────────────────────────────────────────
+    function setBtn(id, text, disabled) {
+        const b = document.getElementById(id);
+        b.textContent = text; b.disabled = disabled;
+    }
+
+    // ── LOGIN ──────────────────────────────────────────────────────────────
+    async function doLogin() {
+        const email    = document.getElementById("loginEmail").value.trim();
+        const password = document.getElementById("loginPassword").value;
+        if (!email || !password) { showToast("Please fill in all fields", "error"); return; }
+        if (!email.includes("@")) { showToast("Enter a valid email address", "error"); return; }
+
+        setBtn("loginBtn", "Sending OTP…", true);
+        try {
+            const res  = await fetch("/api/send_otp", {
+                method:  "POST",
+                headers: {"Content-Type": "application/json"},
+                body:    JSON.stringify({ email, password })
+            });
+            const data = await res.json();
+            if (!res.ok) { showToast(data.error || "Login failed", "error"); return; }
+
+            showOTPPanel(data.email);
+            showToast("OTP sent to your email!", "success");
+        } catch (e) {
+            showToast("Network error. Is the server running?", "error");
+        } finally {
+            setBtn("loginBtn", "Send OTP to Email", false);
+        }
+    }
+
+    // ── REGISTER ───────────────────────────────────────────────────────────
+    async function doRegister() {
+        const name     = document.getElementById("regName").value.trim();
+        const phone    = document.getElementById("regPhone").value.trim();
+        const email    = document.getElementById("regEmail").value.trim();
+        const password = document.getElementById("regPassword").value;
+
+        if (!name || !phone || !email || !password) { showToast("All fields are required", "error"); return; }
+        if (!email.includes("@"))                   { showToast("Enter a valid email address", "error"); return; }
+        if (password.length < 6)                    { showToast("Password must be at least 6 characters", "error"); return; }
+
+        setBtn("registerBtn", "Creating account…", true);
+        try {
+            const res  = await fetch("/api/register", {
+                method:  "POST",
+                headers: {"Content-Type": "application/json"},
+                body:    JSON.stringify({ name, phone, email, password })
+            });
+            const data = await res.json();
+            if (!res.ok) { showToast(data.error || "Registration failed", "error"); return; }
+
+            showOTPPanel(data.email);
+            showToast("Account created! OTP sent to your email.", "success");
+        } catch (e) {
+            showToast("Network error. Is the server running?", "error");
+        } finally {
+            setBtn("registerBtn", "Send OTP & Create Account", false);
+        }
+    }
+
+    // ── VERIFY OTP ─────────────────────────────────────────────────────────
+    async function doVerify() {
+        const otp = document.getElementById("otpCode").value.trim();
+        if (otp.length !== 6 || isNaN(otp)) { showToast("Enter the 6-digit OTP", "error"); return; }
+
+        setBtn("verifyBtn", "Verifying…", true);
+        try {
+            const res  = await fetch("/api/verify_otp", {
+                method:  "POST",
+                headers: {"Content-Type": "application/json"},
+                body:    JSON.stringify({ otp })
+            });
+            const data = await res.json();
+            if (!res.ok) { showToast(data.error || "Invalid OTP", "error"); setBtn("verifyBtn", "Verify OTP ✓", false); return; }
+
+            showToast(`Welcome, ${data.name}! 🎉`, "success");
+            setTimeout(() => window.location.href = "/", 1200);
+        } catch (e) {
+            showToast("Network error", "error");
+            setBtn("verifyBtn", "Verify OTP ✓", false);
+        }
+    }
+
+    // ── enter key support ──────────────────────────────────────────────────
+    document.addEventListener("keydown", (e) => {
+        if (e.key !== "Enter") return;
+        if (document.getElementById("otpPanel").classList.contains("active")) { doVerify(); return; }
+        if (currentMode === "login")    doLogin();
+        else                            doRegister();
+    });
+</script>
+</body>
+</html>

@@ -2,32 +2,66 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Checkout - ArtBridge</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Complete your purchase – ArtBridge handcrafted artisan marketplace.">
+    <title>Checkout – ArtBridge</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
 
-    <!-- Navbar (reuse existing theme) -->
-    <div class="navbar">
-        <div class="logo">ArtBridge</div>
+    <!-- Navbar -->
+    <nav class="navbar" role="navigation">
+        <div class="logo" onclick="window.location.href='/'">ArtBridge</div>
         <div class="nav-links">
-            <a href="/" style="color: white; text-decoration: none;">← Back</a>
+            <a href="/" class="back-link" id="backToShop">← Back to Shop</a>
+            <span class="nav-separator">|</span>
+            {% if session.get('customer_name') %}
+                <span class="nav-btn" style="cursor:default;">👋 {{ session.get('customer_name') }}</span>
+                <span class="nav-btn" onclick="fetch('/api/logout',{method:'POST'}).then(()=>window.location.href='/')" title="Logout" style="color:#e07070;">Logout</span>
+            {% else %}
+                <span class="nav-btn" onclick="window.location.href='/login'">Login</span>
+            {% endif %}
         </div>
-    </div>
+    </nav>
 
-    <div class="container">
-        <div class="products" style="margin-left: 0;">
-            <h2>Checkout</h2>
+    <div class="checkout-wrap">
+        <h1 class="page-title">Secure Checkout</h1>
+        <p class="page-subtitle">Review your item and complete your purchase</p>
 
-            <div class="card">
-                <img id="productImage" alt="Product image" style="display:none;" />
-                <h4 id="productName">Loading...</h4>
-                <p id="productPrice"></p>
-                <p id="productDescription" style="font-weight: normal;"></p>
-                <button id="payNow">Pay Now</button>
+        <div class="checkout-card" id="checkoutCard">
+            <img id="productImage" class="checkout-img" alt="Product image">
+            <div class="checkout-body">
+                <p id="productCategory" style="font-size:12px; color:var(--brand); font-weight:600; text-transform:uppercase; letter-spacing:0.8px; margin-bottom:6px;"></p>
+                <h4 id="productName">Loading product…</h4>
+                <div class="checkout-price" id="productPrice"></div>
+                <p class="checkout-desc" id="productDescription"></p>
+
+                <div style="background:rgba(212,163,115,0.08); border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-bottom:24px;">
+                    <p style="font-size:13px; color:var(--text-3); margin-bottom:2px;">🔒 Secure payment powered by Razorpay</p>
+                    <p style="font-size:12px; color:var(--text-3);">Your payment information is encrypted and secure.</p>
+                </div>
+
+                <div id="addressSection" style="margin-bottom: 24px;">
+                    <label style="display:block; margin-bottom:12px; font-weight:bold; font-size:16px; color:var(--text-2);">Delivery Address <span style="color:red">*</span></label>
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <input type="text" id="addrLine1" placeholder="Address Line 1" required style="width:100%; padding:12px; border-radius:8px; border:1px solid rgba(184, 149, 106, 0.3); background:rgba(0,0,0,0.2); color:var(--text); font-family:inherit;">
+                        <input type="text" id="addrLine2" placeholder="Address Line 2" style="width:100%; padding:12px; border-radius:8px; border:1px solid rgba(184, 149, 106, 0.3); background:rgba(0,0,0,0.2); color:var(--text); font-family:inherit;">
+                        <input type="text" id="addrLine3" placeholder="Address Line 3" style="width:100%; padding:12px; border-radius:8px; border:1px solid rgba(184, 149, 106, 0.3); background:rgba(0,0,0,0.2); color:var(--text); font-family:inherit;">
+                        <input type="text" id="addrLandmark" placeholder="Landmark" style="width:100%; padding:12px; border-radius:8px; border:1px solid rgba(184, 149, 106, 0.3); background:rgba(0,0,0,0.2); color:var(--text); font-family:inherit;">
+                        <div style="display: flex; gap: 10px;">
+                            <input type="text" id="addrCity" placeholder="City" required style="flex: 1; padding:12px; border-radius:8px; border:1px solid rgba(184, 149, 106, 0.3); background:rgba(0,0,0,0.2); color:var(--text); font-family:inherit;">
+                            <input type="text" id="addrState" placeholder="State" required style="flex: 1; padding:12px; border-radius:8px; border:1px solid rgba(184, 149, 106, 0.3); background:rgba(0,0,0,0.2); color:var(--text); font-family:inherit;">
+                        </div>
+                        <input type="text" id="addrPincode" placeholder="Pincode" required style="width:100%; padding:12px; border-radius:8px; border:1px solid rgba(184, 149, 106, 0.3); background:rgba(0,0,0,0.2); color:var(--text); font-family:inherit;">
+                    </div>
+                </div>
+
+                <button id="payNow" aria-label="Pay Now">Pay Now ✦</button>
             </div>
         </div>
     </div>
+
+    <div id="toastContainer" aria-live="polite"></div>
 
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <script>
@@ -36,4 +70,3 @@
     <script src="{{ url_for('static', filename='payment.js') }}"></script>
 </body>
 </html>
-

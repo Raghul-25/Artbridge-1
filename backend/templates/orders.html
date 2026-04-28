@@ -2,29 +2,45 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>My Orders - ArtBridge</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Your orders – ArtBridge handcrafted artisan marketplace.">
+    <title>My Orders – ArtBridge</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
 
     <!-- Navbar -->
-    <div class="navbar">
-        <div class="logo">ArtBridge</div>
+    <nav class="navbar" role="navigation">
+        <div class="logo" onclick="window.location.href='/'">ArtBridge</div>
         <div class="nav-links">
-            <a href="/" style="color: white; text-decoration: none;">← Back</a>
+            <a href="/" class="back-link" id="backToShop">← Back to Shop</a>
+            <span class="nav-separator">|</span>
+            {% if session.get('customer_name') %}
+                <span class="nav-btn" style="cursor:default;">👋 {{ session.get('customer_name') }}</span>
+                <span class="nav-btn" onclick="fetch('/api/logout',{method:'POST'}).then(()=>window.location.href='/')" title="Logout" style="color:#e07070;">Logout</span>
+            {% else %}
+                <span class="nav-btn" onclick="window.location.href='/login'">Login</span>
+            {% endif %}
         </div>
+    </nav>
+
+    <div class="page-wrap">
+        <h1 class="page-title">📦 My Orders</h1>
+        <p class="page-subtitle">Track all your artisan purchases</p>
+
+        <div id="ordersContainer" aria-live="polite"></div>
+
+        <p id="ordersEmptyMessage" style="display:none;">
+            <div class="empty-state">
+                <div class="empty-icon">📦</div>
+                <h3>No orders yet</h3>
+                <p>Browse the marketplace and place your first order!</p>
+            </div>
+        </p>
     </div>
 
-    <div class="container">
-        <div class="products" style="margin-left: 0;">
-            <h2>My Orders</h2>
-
-            <div id="ordersContainer"></div>
-            <p id="ordersEmptyMessage" style="display:none; color:#555; font-size:16px; padding: 18px 6px;">No orders yet</p>
-        </div>
-    </div>
+    <div id="toastContainer" aria-live="polite"></div>
 
     <script src="{{ url_for('static', filename='orders.js') }}"></script>
 </body>
 </html>
-

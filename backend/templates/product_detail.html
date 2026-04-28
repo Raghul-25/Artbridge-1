@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" id="metaDesc" content="Product details – ArtBridge handcrafted artisan marketplace.">
+    <title id="pageTitle">Product – ArtBridge</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar" role="navigation" aria-label="Main navigation">
+        <div class="logo" onclick="window.location.href='/'">ArtBridge</div>
+        <div class="nav-links">
+            <span class="nav-btn" id="navCartBtn" onclick="window.location.href='/cart_page'" title="View Cart">
+                🛒 Cart <span class="cart-badge" id="cartCount">0</span>
+            </span>
+            <span class="nav-separator">|</span>
+            <span class="nav-btn" onclick="window.location.href='/orders_page'">📦 Orders</span>
+            <span class="nav-separator">|</span>
+            {% if session.get('customer_name') %}
+                <span class="nav-btn" style="cursor:default;">👋 {{ session.get('customer_name') }}</span>
+                <span class="nav-btn" onclick="fetch('/api/logout',{method:'POST'}).then(()=>window.location.reload())" title="Logout" style="color:#e07070;">Logout</span>
+            {% else %}
+                <span class="nav-btn" onclick="window.location.href='/login'">Login</span>
+            {% endif %}
+        </div>
+    </nav>
+
+    <!-- Breadcrumb -->
+    <div class="breadcrumb-bar" id="breadcrumbBar">
+        <span class="breadcrumb-link" onclick="window.location.href='/'">Home</span>
+        <span class="breadcrumb-sep">›</span>
+        <span class="breadcrumb-link" id="breadcrumbCategory" onclick="window.location.href='/'">Products</span>
+        <span class="breadcrumb-sep">›</span>
+        <span class="breadcrumb-current" id="breadcrumbName">Loading…</span>
+    </div>
+
+    <!-- Loading State -->
+    <div id="detailLoading" class="detail-loading">
+        <div class="detail-skeleton-wrap">
+            <div class="skeleton detail-skeleton-img"></div>
+            <div class="detail-skeleton-side">
+                <div class="skeleton skeleton-line short" style="height:14px; margin-bottom:16px;"></div>
+                <div class="skeleton skeleton-line full" style="height:28px; margin-bottom:10px;"></div>
+                <div class="skeleton skeleton-line medium" style="height:28px; margin-bottom:24px;"></div>
+                <div class="skeleton skeleton-line full" style="height:12px; margin-bottom:8px;"></div>
+                <div class="skeleton skeleton-line full" style="height:12px; margin-bottom:8px;"></div>
+                <div class="skeleton skeleton-line medium" style="height:12px; margin-bottom:32px;"></div>
+                <div class="skeleton skeleton-line short" style="height:44px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Product Detail Content -->
+    <div id="detailContent" class="detail-wrap" style="display:none;">
+
+        <!-- Product Section -->
+        <div class="detail-grid">
+
+            <!-- Left: Image Gallery -->
+            <div class="detail-gallery">
+                <div class="detail-img-main" id="mainImgWrap">
+                    <img id="mainImg" alt="Product image" class="detail-main-img">
+                    <div class="detail-img-badges">
+                        <span class="detail-badge-category" id="badgeCategory"></span>
+                    </div>
+                </div>
+                <!-- Thumbnails for carousel -->
+                <div class="detail-thumbnails" id="detailThumbnails" style="display:flex; gap:10px; margin-top:15px; overflow-x:auto;">
+                </div>
+            </div>
+
+            <!-- Right: Product Info -->
+            <div class="detail-info">
+                <div class="detail-category-tag" id="detailCategoryTag"></div>
+                <h1 class="detail-title" id="detailName"></h1>
+
+                <div class="detail-rating-row" id="detailRatingRow" style="display:none;">
+                    <div class="star-rating" id="artisanStars"></div>
+                    <span class="detail-rating-label" id="artisanRatingLabel"></span>
+                </div>
+
+                <div class="detail-price-block">
+                    <span class="detail-price" id="detailPrice"></span>
+                    <span class="detail-price-tag">Inclusive of all taxes</span>
+                </div>
+
+                <p class="detail-description" id="detailDescription"></p>
+
+
+
+                <!-- Actions -->
+                <div class="detail-actions">
+                    <button class="detail-btn-cart" id="detailCartBtn">🛒 Add to Cart</button>
+                    <button class="detail-btn-buy" id="detailBuyBtn">Buy Now →</button>
+                </div>
+
+                <!-- Tags -->
+                <div class="detail-tags" id="detailTags"></div>
+
+                <!-- Guarantees -->
+                <div class="detail-guarantees">
+                    <div class="guarantee-item">
+                        <span class="guarantee-icon">🔒</span>
+                        <span>Secure Payment</span>
+                    </div>
+                    <div class="guarantee-item">
+                        <span class="guarantee-icon">🚚</span>
+                        <span>Free Shipping</span>
+                    </div>
+                    <div class="guarantee-item">
+                        <span class="guarantee-icon">🏺</span>
+                        <span>100% Handmade</span>
+                    </div>
+                    <div class="guarantee-item">
+                        <span class="guarantee-icon">↩️</span>
+                        <span>Easy Returns</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Artisan Section -->
+        <div class="artisan-section" id="artisanSection">
+            <div class="artisan-section-header">
+                <div class="artisan-section-line"></div>
+                <h2 class="artisan-section-title">Meet the Artisan</h2>
+                <div class="artisan-section-line"></div>
+            </div>
+
+            <!-- Artisan Card Content -->
+            <div class="artisan-card" id="artisanCard">
+                <div class="artisan-photo-wrap">
+                    <img class="artisan-photo" id="artisanPhoto" alt="Artisan photo">
+                    <div class="artisan-verified" id="artisanVerified" style="display:none;" title="Verified Artisan">✓</div>
+                </div>
+                <div class="artisan-info">
+                    <div class="artisan-name-row">
+                        <h3 class="artisan-name" id="artisanName"></h3>
+                        <div class="artisan-stars" id="artisanCardStars"></div>
+                    </div>
+                    <div class="artisan-meta-chips" id="artisanMetaChips"></div>
+                    <p class="artisan-bio" id="artisanBio"></p>
+                    <div class="artisan-stats" id="artisanStats"></div>
+                </div>
+            </div>
+
+            <!-- No artisan fallback -->
+            <div class="artisan-empty" id="artisanEmpty" style="display:none;">
+                <span class="artisan-empty-icon">🏺</span>
+                <p>Artisan information will be available soon.</p>
+            </div>
+        </div>
+
+        <!-- Care Notes -->
+        <div class="detail-care" id="detailCare" style="display:none;">
+            <h3 class="detail-section-title">Care Instructions</h3>
+            <p id="careText"></p>
+        </div>
+
+        <!-- Back to shop -->
+        <div style="text-align:center; padding: 48px 0 24px;">
+            <button class="back-to-shop-btn" onclick="window.location.href='/'">
+                ← Continue Shopping
+            </button>
+        </div>
+
+    </div>
+
+    <!-- Error State -->
+    <div id="detailError" style="display:none;" class="detail-error-state">
+        <div class="empty-state">
+            <div class="empty-icon">⚠️</div>
+            <h3>Product not found</h3>
+            <p>This product may no longer be available.</p>
+            <button class="detail-btn-buy" style="margin-top:20px;" onclick="window.location.href='/'">Back to Shop</button>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toastContainer" aria-live="polite"></div>
+
+    <script src="{{ url_for('static', filename='product_detail.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,37 @@
+[Unit]
+Description=ArtBridge Flask Application (Gunicorn)
+After=network.target
+
+[Service]
+User=ubuntu
+Group=ubuntu
+WorkingDirectory=/home/ubuntu/artbridge/backend
+Environment="PATH=/home/ubuntu/artbridge/backend/venv/bin"
+Environment="FLASK_ENV=production"
+# ─── AWS Credentials (replace with your IAM Role values or use an EC2 IAM Role) ───
+# If your EC2 instance has an IAM Role attached with DynamoDB access,
+# you do NOT need to set these — boto3 will auto-detect from the instance metadata.
+# Only uncomment if you are NOT using an IAM Role:
+# Environment="AWS_ACCESS_KEY_ID=YOUR_KEY_HERE"
+# Environment="AWS_SECRET_ACCESS_KEY=YOUR_SECRET_HERE"
+Environment="AWS_DEFAULT_REGION=us-east-1"
+Environment="DYNAMO_TABLE_PRODUCTS=ArtBridgeProducts"
+Environment="DYNAMO_TABLE_ORDERS=ArtBridgeOrders"
+Environment="DYNAMO_TABLE_USERS=ArtBridgeUsers"
+# ─── Generate a strong random key for sessions ────────────────────────────────
+# Run this to generate one: python3 -c "import secrets; print(secrets.token_hex(32))"
+Environment="SECRET_KEY=REPLACE_WITH_A_STRONG_RANDOM_SECRET_KEY"
+ExecStart=/home/ubuntu/artbridge/backend/venv/bin/gunicorn \
+    --workers 4 \
+    --bind 127.0.0.1:5000 \
+    --timeout 120 \
+    --access-logfile /var/log/artbridge/access.log \
+    --error-logfile /var/log/artbridge/error.log \
+    wsgi:app
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
