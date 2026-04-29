@@ -77,8 +77,8 @@ function displayOrders(orders) {
       </div>
       <div class="order-meta">
         <div class="order-meta-item">
-          <label>Product ID</label>
-          <span>#${o?.product_id ?? "—"}</span>
+          <label>Product Name</label>
+          <span>${o?.product_name ?? "—"}</span>
         </div>
         <div class="order-meta-item">
           <label>Tracking</label>

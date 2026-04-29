@@ -221,9 +221,10 @@ def create_app():
             cur = conn.cursor()
             cur.execute(
                 """
-                SELECT id, product_id, status, tracking, payment_status
-                FROM orders
-                ORDER BY id DESC
+                SELECT o.id, o.product_id, o.status, o.tracking, o.payment_status, p.name as product_name
+                FROM orders o
+                LEFT JOIN products p ON o.product_id = p.id
+                ORDER BY o.id DESC
                 """
             )
             rows = cur.fetchall()
@@ -231,6 +232,7 @@ def create_app():
                 {
                     "order_id": row["id"],
                     "product_id": row["product_id"],
+                    "product_name": row["product_name"],
                     "status": row["status"],
                     "tracking": row["tracking"],
                     "payment_status": row["payment_status"],
