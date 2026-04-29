@@ -217,14 +217,21 @@ def create_app():
     def get_orders():
         conn = None
         try:
+            # 1. Fetch products from DynamoDB to map product_id to product_name
+            try:
+                products = dynamodb.get_products_with_artisans()
+                product_map = {str(p["id"]): p.get("name", "Unknown Product") for p in products}
+            except Exception as e:
+                print(f"Warning: Failed to fetch products from Dynamo: {e}")
+                product_map = {}
+
             conn = get_connection()
             cur = conn.cursor()
             cur.execute(
                 """
-                SELECT o.id, o.product_id, o.status, o.tracking, o.payment_status, p.name as product_name
-                FROM orders o
-                LEFT JOIN products p ON o.product_id = p.id
-                ORDER BY o.id DESC
+                SELECT id, product_id, status, tracking, payment_status
+                FROM orders
+                ORDER BY id DESC
                 """
             )
             rows = cur.fetchall()
@@ -232,7 +239,7 @@ def create_app():
                 {
                     "order_id": row["id"],
                     "product_id": row["product_id"],
-                    "product_name": row["product_name"],
+                    "product_name": product_map.get(str(row["product_id"]), f"Product #{row['product_id']}"),
                     "status": row["status"],
                     "tracking": row["tracking"],
                     "payment_status": row["payment_status"],
