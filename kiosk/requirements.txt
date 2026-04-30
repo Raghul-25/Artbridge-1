@@ -1,0 +1,22 @@
+# ArtBridge Kiosk — Python dependencies
+# Install with: pip install -r requirements.txt
+
+# ── Core UI ───────────────────────────────────────────────────
+PyQt5>=5.15.0
+
+# ── Voice (choose one or more; engine auto-selects best available) ──────────
+pyttsx3>=2.90          # offline TTS (Level 3 fallback)
+gtts>=2.3.0            # online TTS, best quality (Level 1 / 2)
+pygame>=2.1.0          # audio playback for gTTS mp3
+
+# ── Fingerprint sensor ────────────────────────────────────────
+pyfingerprint>=1.5     # R307 / R503 sensor driver
+
+# ── Cloud Sync & Camera ───────────────────────────────────────
+boto3                  # AWS S3 & DynamoDB sync
+opencv-python>=4.5.0   # product photo capture
+
+# ── System packages (install via apt on Ubuntu/Raspberry Pi OS) ──────────────
+# sudo apt install espeak-ng ffmpeg python3-pyqt5
+# sudo apt install python3-pyqt5.qtsvg libglib2.0-0
+# sudo apt install fonts-noto fonts-noto-cjk   # Indian script support
